@@ -1,4 +1,4 @@
-package de.jverhoelen.cryptoalerts;
+package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.google.common.base.MoreObjects;
 
@@ -10,6 +10,7 @@ public class TrollboxMessage {
     private long id;
     private String timestamp;
     private String message;
+    private String[] topics;
 
     public static TrollboxMessage from(String message, long id) {
         TrollboxMessage msg = new TrollboxMessage();
@@ -19,6 +20,14 @@ public class TrollboxMessage {
         msg.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         return msg;
+    }
+
+    public String[] getTopics() {
+        return topics;
+    }
+
+    public void setTopics(String[] topics) {
+        this.topics = topics;
     }
 
     public long getId() {
