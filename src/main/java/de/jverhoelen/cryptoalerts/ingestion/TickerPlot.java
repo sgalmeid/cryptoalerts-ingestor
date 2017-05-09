@@ -1,4 +1,6 @@
-package de.jverhoelen.cryptoalerts;
+package de.jverhoelen.cryptoalerts.ingestion;
+
+import com.google.common.base.MoreObjects;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,7 +25,6 @@ public class TickerPlot {
         TickerPlot p = new TickerPlot();
 
         p.setCurrencyCombination(arr[0]);
-        p.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         p.setLast(Double.parseDouble(arr[1]));
         p.setLowestAsk(Double.parseDouble(arr[2]));
         p.setHighestBid(Double.parseDouble(arr[3]));
@@ -34,6 +35,7 @@ public class TickerPlot {
         p.setDayHigh(Double.parseDouble(arr[8]));
         p.setDayLow(Double.parseDouble(arr[9]));
 
+        p.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         p.setId(p.getCurrencyCombination() + "-" + p.getTimestamp());
 
         return p;
@@ -137,8 +139,10 @@ public class TickerPlot {
 
     @Override
     public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
+                .add("id", id)
                 .add("currencyCombination", currencyCombination)
+                .add("timestamp", timestamp)
                 .add("last", last)
                 .add("lowestAsk", lowestAsk)
                 .add("highestBid", highestBid)
