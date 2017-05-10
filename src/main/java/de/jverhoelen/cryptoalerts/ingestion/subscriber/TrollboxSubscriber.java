@@ -5,14 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.jverhoelen.cryptoalerts.currency.CryptoCurrency;
 import de.jverhoelen.cryptoalerts.ingestion.ElasticsearchIndexClient;
 import de.jverhoelen.cryptoalerts.ingestion.TrollboxMessage;
+import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import rx.functions.Action1;
 import ws.wamp.jawampa.PubSubData;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -24,11 +27,16 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private ElasticsearchIndexClient elasticsearchClient;
+    private List<String> positiveTerms;
+    private List<String> negativeTerms;
 
-    public TrollboxSubscriber(ElasticsearchIndexClient elasticsearchClient) {
+    public TrollboxSubscriber(ElasticsearchIndexClient elasticsearchClient, List<String> positiveTerms, List<String> negativeTerms) {
         this.elasticsearchClient = elasticsearchClient;
+        this.positiveTerms = positiveTerms;
+        this.negativeTerms = negativeTerms;
     }
 
+    @Async
     @Override
     public void call(PubSubData s) {
         try {
@@ -36,11 +44,13 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
             });
             long messageNumber = Long.parseLong(raw[1]);
             String messageText = raw[3];
-            Set<String> topics = extractInterestingCurrencies(messageText);
+            String lowerCaseMessage = messageText.toLowerCase();
+            Set<String> topics = extractInterestingCurrencies(lowerCaseMessage);
 
             if (!topics.isEmpty()) {
                 TrollboxMessage message = TrollboxMessage.from(messageText, messageNumber);
                 message.setTopics(topics);
+                message.setSentimentKind(analyseIntention(lowerCaseMessage));
 
                 elasticsearchClient.putIntoIndex(message, TROLLBOX_INDEX, message.getId() + "");
                 System.out.println("'" + messageText + "' ✅ (" + topics.size() + " currency names found)");
@@ -55,11 +65,22 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
         }
     }
 
-    private Set<String> extractInterestingCurrencies(String message) {
-        String lcMessage = message.toLowerCase();
+    private SentimentTermKind analyseIntention(String message) {
+        long positiveMatches = positiveTerms.stream().filter(term -> message.indexOf(term) > 0).count();
+        long negativeMatches = negativeTerms.stream().filter(term -> message.indexOf(term) > 0).count();
 
+        if (positiveMatches > negativeMatches) {
+            return SentimentTermKind.POSITIVE;
+        } else if (negativeMatches > positiveMatches) {
+            return SentimentTermKind.NEGATIVE;
+        }
+
+        return SentimentTermKind.NEUTRAL;
+    }
+
+    private Set<String> extractInterestingCurrencies(String message) {
         return Arrays.stream(CryptoCurrency.values())
-                .filter(isCryptoShortOrFullNameInMessage(lcMessage))
+                .filter(isCryptoShortOrFullNameInMessage(message))
                 .map(crypto -> crypto.name())
                 .collect(Collectors.toSet());
     }
