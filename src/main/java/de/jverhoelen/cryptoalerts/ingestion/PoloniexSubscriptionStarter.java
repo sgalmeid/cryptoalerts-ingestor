@@ -44,8 +44,8 @@ public class PoloniexSubscriptionStarter {
         List<IndexedCurrencyCombination> all = currencyCombinations.getAll();
         List<String> combinationStrings = all.stream().map(cc -> cc.toApiKey()).collect(Collectors.toList());
 
-        List<String> positiveTerms = sentimentTerms.findByKind(SentimentTermKind.NEGATIVE);
-        List<String> negativeTerms = sentimentTerms.findByKind(SentimentTermKind.POSITIVE);
+        List<String> positiveTerms = sentimentTerms.findByKind(SentimentTermKind.POSITIVE);
+        List<String> negativeTerms = sentimentTerms.findByKind(SentimentTermKind.NEGATIVE);
 
         WampClient client;
         try {
