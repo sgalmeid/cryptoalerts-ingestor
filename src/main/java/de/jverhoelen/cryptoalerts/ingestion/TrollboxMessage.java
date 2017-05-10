@@ -4,13 +4,14 @@ import com.google.common.base.MoreObjects;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 public class TrollboxMessage {
 
     private long id;
     private String timestamp;
     private String message;
-    private String[] topics;
+    private Set<String> topics;
 
     public static TrollboxMessage from(String message, long id) {
         TrollboxMessage msg = new TrollboxMessage();
@@ -22,11 +23,11 @@ public class TrollboxMessage {
         return msg;
     }
 
-    public String[] getTopics() {
+    public Set<String> getTopics() {
         return topics;
     }
 
-    public void setTopics(String[] topics) {
+    public void setTopics(Set<String> topics) {
         this.topics = topics;
     }
 
@@ -60,6 +61,7 @@ public class TrollboxMessage {
                 .add("id", id)
                 .add("timestamp", timestamp)
                 .add("message", message)
+                .add("topics", topics)
                 .toString();
     }
 }
