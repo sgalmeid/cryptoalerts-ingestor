@@ -21,9 +21,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -79,8 +80,8 @@ public class PoloniexTickerConsumerApplication extends AsyncConfigurerSupport {
 
         sentimentKindFileNames.entrySet().stream().forEach(sk -> {
             try {
-                File file = new ClassPathResource(sk.getValue()).getFile();
-                Stream<String> lines = Files.lines(file.toPath());
+                InputStream file = new ClassPathResource(sk.getValue()).getInputStream();
+                Stream<String> lines = new BufferedReader(new InputStreamReader(file, "UTF-8")).lines();
 
                 lines.forEach(line -> sentimentTerms.add(new SentimentTerm(sk.getKey(), line)));
             } catch (IOException e) {
