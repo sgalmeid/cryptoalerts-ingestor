@@ -2,15 +2,13 @@ package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.google.common.base.MoreObjects;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 public class TickerPlot {
 
-    private String id;
+//    private static final String RFC_3339_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZZ";
+//    private static final FastDateFormat RFC_3339_DATE_FORMATTER = FastDateFormat.getInstance(RFC_3339_DATE_FORMAT);
 
+    private String id;
     private String currencyCombination;
-    private String timestamp;
     private double last;
     private double lowestAsk;
     private double highestBid;
@@ -34,20 +32,11 @@ public class TickerPlot {
         p.setIsFrozen(Integer.parseInt(arr[7]));
         p.setDayHigh(Double.parseDouble(arr[8]));
         p.setDayLow(Double.parseDouble(arr[9]));
-
-        p.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        p.setId(p.getCurrencyCombination() + "-" + p.getTimestamp());
+        p.setId(p.getCurrencyCombination() + "-" + System.currentTimeMillis());
 
         return p;
     }
 
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public String getId() {
         return id;
@@ -142,7 +131,6 @@ public class TickerPlot {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
                 .add("currencyCombination", currencyCombination)
-                .add("timestamp", timestamp)
                 .add("last", last)
                 .add("lowestAsk", lowestAsk)
                 .add("highestBid", highestBid)
