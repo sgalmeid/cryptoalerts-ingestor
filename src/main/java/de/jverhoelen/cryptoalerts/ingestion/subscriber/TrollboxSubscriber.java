@@ -66,8 +66,8 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
     }
 
     private SentimentTermKind analyseIntention(String message) {
-        long positiveMatches = positiveTerms.stream().filter(term -> message.indexOf(term) > 0).count();
-        long negativeMatches = negativeTerms.stream().filter(term -> message.indexOf(term) > 0).count();
+        long positiveMatches = positiveTerms.stream().filter(term -> containsTermAsWord(message, term)).count();
+        long negativeMatches = negativeTerms.stream().filter(term -> containsTermAsWord(message, term)).count();
 
         if (positiveMatches > negativeMatches) {
             return SentimentTermKind.POSITIVE;
@@ -76,6 +76,10 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
         }
 
         return SentimentTermKind.NEUTRAL;
+    }
+
+    static boolean containsTermAsWord(String message, String term) {
+        return message.matches(".*\\b" + term + "\\b.*");
     }
 
     private Set<String> extractInterestingCurrencies(String message) {

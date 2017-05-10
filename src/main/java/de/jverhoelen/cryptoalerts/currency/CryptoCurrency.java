@@ -30,7 +30,7 @@ public enum CryptoCurrency {
     SJCX("StorjcoinX"),
     SC("Siacoin"),
     SBD("SteemDollars"),
-    RC("RieCoin"),
+    RIC("RieCoin"),
     REP("Augur"),
     RADS("Radium"),
     PPC("Peercoin"),
