@@ -1,6 +1,7 @@
 package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.google.common.base.MoreObjects;
+import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,6 +12,7 @@ public class TrollboxMessage {
     private long id;
     private String timestamp;
     private String message;
+    private SentimentTermKind sentimentKind;
     private Set<String> topics;
 
     public static TrollboxMessage from(String message, long id) {
@@ -21,6 +23,14 @@ public class TrollboxMessage {
         msg.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         return msg;
+    }
+
+    public SentimentTermKind getSentimentKind() {
+        return sentimentKind;
+    }
+
+    public void setSentimentKind(SentimentTermKind sentimentKind) {
+        this.sentimentKind = sentimentKind;
     }
 
     public Set<String> getTopics() {
@@ -61,6 +71,7 @@ public class TrollboxMessage {
                 .add("id", id)
                 .add("timestamp", timestamp)
                 .add("message", message)
+                .add("sentimentKind", sentimentKind)
                 .add("topics", topics)
                 .toString();
     }

@@ -1,10 +1,11 @@
 package de.jverhoelen.cryptoalerts.ingestion;
 
-import de.jverhoelen.cryptoalerts.currency.CryptoCurrency;
 import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombination;
 import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombinationService;
 import de.jverhoelen.cryptoalerts.ingestion.subscriber.TickerSubscriber;
 import de.jverhoelen.cryptoalerts.ingestion.subscriber.TrollboxSubscriber;
+import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
+import de.jverhoelen.cryptoalerts.sentiment.SentimentTermService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,26 +16,36 @@ import ws.wamp.jawampa.connection.IWampConnectorProvider;
 import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
-public class PoloniexSubscriber {
+public class PoloniexSubscriptionStarter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PoloniexSubscriber.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PoloniexSubscriptionStarter.class);
 
-    @Autowired
     private IndexedCurrencyCombinationService currencyCombinations;
+    private ElasticsearchIndexClient elasticsearchClient;
+    private SentimentTermService sentimentTerms;
 
     @Autowired
-    private ElasticsearchIndexClient elasticsearchClient;
+    public PoloniexSubscriptionStarter(IndexedCurrencyCombinationService currencyCombinations,
+                                       ElasticsearchIndexClient elasticsearchClient,
+                                       SentimentTermService sentimentTerms) {
+        this.currencyCombinations = currencyCombinations;
+        this.elasticsearchClient = elasticsearchClient;
+        this.sentimentTerms = sentimentTerms;
+    }
 
     @PostConstruct
     public void startConsumption() throws Exception {
         List<IndexedCurrencyCombination> all = currencyCombinations.getAll();
         List<String> combinationStrings = all.stream().map(cc -> cc.toApiKey()).collect(Collectors.toList());
+
+        List<String> positiveTerms = sentimentTerms.findByKind(SentimentTermKind.NEGATIVE);
+        List<String> negativeTerms = sentimentTerms.findByKind(SentimentTermKind.POSITIVE);
 
         WampClient client;
         try {
@@ -52,7 +63,7 @@ public class PoloniexSubscriber {
                     client.makeSubscription("ticker")
                             .subscribe(new TickerSubscriber(combinationStrings, elasticsearchClient));
                     client.makeSubscription("trollbox")
-                            .subscribe(new TrollboxSubscriber(elasticsearchClient));
+                            .subscribe(new TrollboxSubscriber(elasticsearchClient, positiveTerms, negativeTerms));
                 }
             });
             client.open();
