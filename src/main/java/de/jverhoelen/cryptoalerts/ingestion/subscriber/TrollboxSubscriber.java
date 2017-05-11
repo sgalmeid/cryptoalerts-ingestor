@@ -36,8 +36,8 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
         this.negativeTerms = negativeTerms;
     }
 
-    @Async
     @Override
+    @Async
     public void call(PubSubData s) {
         try {
             String[] raw = objectMapper.readValue(s.arguments().toString(), new TypeReference<String[]>() {
@@ -58,7 +58,6 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
                 }
 
                 elasticsearchClient.putIntoIndex(message, TROLLBOX_INDEX, message.getId() + "");
-                System.out.println("'" + messageText + "' ✅ (" + topics.size() + " currency names found)");
             }
 
         } catch (IOException e) {

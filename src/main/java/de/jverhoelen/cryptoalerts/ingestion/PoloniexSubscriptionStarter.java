@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import rx.functions.Action1;
 import ws.wamp.jawampa.WampClient;
 import ws.wamp.jawampa.WampClientBuilder;
 import ws.wamp.jawampa.connection.IWampConnectorProvider;
@@ -65,29 +64,25 @@ public class PoloniexSubscriptionStarter {
                     .withReconnectInterval(5, TimeUnit.SECONDS);
             client = builder.build();
 
-            client.statusChanged().subscribe(subscribeTopics(combinationStrings, positiveTerms, negativeTerms, client));
+            client.statusChanged().subscribe(action -> {
+                if (action instanceof WampClient.ConnectedState) {
+                    if (ingestTicker) {
+                        LOGGER.info("Started ingesting ticker...");
+                        client.makeSubscription("ticker")
+                                .subscribe(new TickerSubscriber(combinationStrings, elasticsearchClient));
+                    }
+                    if (ingestTrollbox) {
+                        LOGGER.info("Started ingesting trollbox...");
+                        client.makeSubscription("trollbox")
+                                .subscribe(new TrollboxSubscriber(elasticsearchClient, positiveTerms, negativeTerms));
+                    }
+                }
+            });
             client.open();
 
         } catch (Exception e) {
             LOGGER.error("Error while consuming the ticker", e);
             return;
         }
-    }
-
-    private Action1<WampClient.State> subscribeTopics(List<String> combinationStrings, List<String> positiveTerms, List<String> negativeTerms, WampClient client) {
-        return action -> {
-            if (action instanceof WampClient.ConnectedState) {
-                if (ingestTicker) {
-                    LOGGER.info("Started ingesting ticker...");
-                    client.makeSubscription("ticker")
-                            .subscribe(new TickerSubscriber(combinationStrings, elasticsearchClient));
-                }
-                if (ingestTrollbox) {
-                    LOGGER.info("Started ingesting trollbox...");
-                    client.makeSubscription("trollbox")
-                            .subscribe(new TrollboxSubscriber(elasticsearchClient, positiveTerms, negativeTerms));
-                }
-            }
-        };
     }
 }

@@ -6,6 +6,7 @@ import de.jverhoelen.cryptoalerts.ingestion.ElasticsearchIndexClient;
 import de.jverhoelen.cryptoalerts.ingestion.TickerPlot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import rx.functions.Action1;
 import ws.wamp.jawampa.PubSubData;
 
@@ -28,6 +29,7 @@ public class TickerSubscriber implements Action1<PubSubData> {
     }
 
     @Override
+    @Async
     public void call(PubSubData s) {
         try {
             String[] raw = objectMapper.readValue(s.arguments().toString(), new TypeReference<String[]>() {
