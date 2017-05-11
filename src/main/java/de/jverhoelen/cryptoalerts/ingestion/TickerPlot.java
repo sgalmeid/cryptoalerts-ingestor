@@ -26,7 +26,7 @@ public class TickerPlot {
         TickerPlot p = new TickerPlot();
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         df.setTimeZone(tz);
         String nowAsISO = df.format(new Date());
 
@@ -41,7 +41,7 @@ public class TickerPlot {
         p.setIsFrozen(Integer.parseInt(arr[7]));
         p.setDayHigh(Double.parseDouble(arr[8]));
         p.setDayLow(Double.parseDouble(arr[9]));
-        p.setId(p.getCurrencyCombination() + "-" + System.currentTimeMillis());
+        p.setId(p.getCurrencyCombination() + "-" + nowAsISO);
 
         return p;
     }
@@ -147,6 +147,7 @@ public class TickerPlot {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
                 .add("currencyCombination", currencyCombination)
+                .add("occurrenceTimestamp", occurrenceTimestamp)
                 .add("last", last)
                 .add("lowestAsk", lowestAsk)
                 .add("highestBid", highestBid)
