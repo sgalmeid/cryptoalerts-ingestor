@@ -3,14 +3,16 @@ package de.jverhoelen.cryptoalerts.ingestion;
 import com.google.common.base.MoreObjects;
 import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class TrollboxMessage {
 
     private long id;
-    private String timestamp;
+    private String occurrenceTimestamp;
     private String message;
     private SentimentTermKind sentimentKind;
     private Set<String> topics;
@@ -20,7 +22,13 @@ public class TrollboxMessage {
 
         msg.setId(id);
         msg.setMessage(message);
-        msg.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        df.setTimeZone(tz);
+        String nowAsISO = df.format(new Date());
+
+        msg.setOccurrenceTimestamp(nowAsISO);
 
         return msg;
     }
@@ -49,12 +57,12 @@ public class TrollboxMessage {
         this.id = id;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public String getOccurrenceTimestamp() {
+        return occurrenceTimestamp;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setOccurrenceTimestamp(String occurrenceTimestamp) {
+        this.occurrenceTimestamp = occurrenceTimestamp;
     }
 
     public String getMessage() {
@@ -69,7 +77,7 @@ public class TrollboxMessage {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
-                .add("timestamp", timestamp)
+                .add("occurrenceTimestamp", occurrenceTimestamp)
                 .add("message", message)
                 .add("sentimentKind", sentimentKind)
                 .add("topics", topics)
