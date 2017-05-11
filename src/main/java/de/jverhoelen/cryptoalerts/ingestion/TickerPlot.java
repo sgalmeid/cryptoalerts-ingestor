@@ -2,13 +2,16 @@ package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.google.common.base.MoreObjects;
 
-public class TickerPlot {
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
-//    private static final String RFC_3339_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZZ";
-//    private static final FastDateFormat RFC_3339_DATE_FORMATTER = FastDateFormat.getInstance(RFC_3339_DATE_FORMAT);
+public class TickerPlot {
 
     private String id;
     private String currencyCombination;
+    private String occurrenceTimestamp;
     private double last;
     private double lowestAsk;
     private double highestBid;
@@ -22,6 +25,12 @@ public class TickerPlot {
     public static TickerPlot from(String[] arr) {
         TickerPlot p = new TickerPlot();
 
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        df.setTimeZone(tz);
+        String nowAsISO = df.format(new Date());
+
+        p.setOccurrenceTimestamp(nowAsISO);
         p.setCurrencyCombination(arr[0]);
         p.setLast(Double.parseDouble(arr[1]));
         p.setLowestAsk(Double.parseDouble(arr[2]));
@@ -37,6 +46,13 @@ public class TickerPlot {
         return p;
     }
 
+    public String getOccurrenceTimestamp() {
+        return occurrenceTimestamp;
+    }
+
+    public void setOccurrenceTimestamp(String occurrenceTimestamp) {
+        this.occurrenceTimestamp = occurrenceTimestamp;
+    }
 
     public String getId() {
         return id;
