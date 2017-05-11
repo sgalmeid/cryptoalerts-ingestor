@@ -50,7 +50,12 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
             if (!topics.isEmpty()) {
                 TrollboxMessage message = TrollboxMessage.from(messageText, messageNumber);
                 message.setTopics(topics);
-                message.setSentimentKind(analyseIntention(lowerCaseMessage));
+
+                if (topics.size() == 1) {
+                    message.setSentimentKind(analyseIntention(lowerCaseMessage));
+                } else {
+                    message.setSentimentKind(SentimentTermKind.NEUTRAL);
+                }
 
                 elasticsearchClient.putIntoIndex(message, TROLLBOX_INDEX, message.getId() + "");
                 System.out.println("'" + messageText + "' ✅ (" + topics.size() + " currency names found)");
