@@ -44,15 +44,14 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
             });
             long messageNumber = Long.parseLong(raw[1]);
             String messageText = raw[3];
-            String lowerCaseMessage = messageText.toLowerCase();
-            Set<String> topics = extractInterestingCurrencies(lowerCaseMessage);
+            Set<String> topics = extractInterestingCurrencies(messageText);
 
             if (!topics.isEmpty()) {
                 TrollboxMessage message = TrollboxMessage.from(messageText, messageNumber);
                 message.setTopics(topics);
 
                 if (topics.size() == 1) {
-                    message.setSentimentKind(analyseIntention(lowerCaseMessage));
+                    message.setSentimentKind(analyseIntention(messageText));
                 } else {
                     message.setSentimentKind(SentimentTermKind.NEUTRAL);
                 }
@@ -69,9 +68,10 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
         }
     }
 
-    private SentimentTermKind analyseIntention(String message) {
-        long positiveMatches = positiveTerms.stream().filter(term -> containsTermAsWord(message, term)).count();
-        long negativeMatches = negativeTerms.stream().filter(term -> containsTermAsWord(message, term)).count();
+    SentimentTermKind analyseIntention(String message) {
+        String lcMessage = message.toLowerCase();
+        long positiveMatches = positiveTerms.stream().filter(term -> containsTermAsWord(lcMessage, term)).count();
+        long negativeMatches = negativeTerms.stream().filter(term -> containsTermAsWord(lcMessage, term)).count();
 
         if (positiveMatches > negativeMatches) {
             return SentimentTermKind.POSITIVE;
@@ -86,15 +86,18 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
         return message.matches(".*\\b" + term + "\\b.*");
     }
 
-    private Set<String> extractInterestingCurrencies(String message) {
+    Set<String> extractInterestingCurrencies(String message) {
+        String lcMessage = message.toLowerCase();
+
         return Arrays.stream(CryptoCurrency.values())
-                .filter(isCryptoShortOrFullNameInMessage(message))
+                .filter(isCryptoShortOrFullNameInMessage(lcMessage))
                 .map(crypto -> crypto.name())
                 .collect(Collectors.toSet());
     }
 
     private Predicate<CryptoCurrency> isCryptoShortOrFullNameInMessage(String message) {
         return crypto ->
-                message.indexOf(crypto.getFullName().toLowerCase()) > -1 || message.indexOf(crypto.name().toLowerCase()) > -1;
+                containsTermAsWord(message, crypto.getFullName().toLowerCase()) ||
+                        containsTermAsWord(message, crypto.name().toLowerCase());
     }
 }

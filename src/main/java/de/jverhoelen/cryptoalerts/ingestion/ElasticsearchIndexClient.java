@@ -2,6 +2,7 @@ package de.jverhoelen.cryptoalerts.ingestion;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
@@ -17,10 +18,16 @@ import java.net.URISyntaxException;
 public class ElasticsearchIndexClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticsearchIndexClient.class);
-    private RestTemplate restTemplate = new RestTemplate();
-
-    @Value("${es.host}")
+    private RestTemplate restTemplate;
     private String elasticsearchHost;
+
+    @Autowired
+    public ElasticsearchIndexClient(
+            RestTemplate restTemplate,
+            @Value("${es.host}") String elasticsearchHost) {
+        this.restTemplate = restTemplate;
+        this.elasticsearchHost = elasticsearchHost;
+    }
 
     @Async
     public <T> void putIntoIndex(T entry, String index, String id) throws URISyntaxException {
