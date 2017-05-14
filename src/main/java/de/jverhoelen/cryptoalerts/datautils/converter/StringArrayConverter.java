@@ -10,6 +10,10 @@ public class StringArrayConverter implements AttributeConverter<String[], String
 
     @Override
     public String convertToDatabaseColumn(String[] strings) {
+        if (strings == null) {
+            return "";
+        }
+
         return String.join(",", strings);
     }
 
