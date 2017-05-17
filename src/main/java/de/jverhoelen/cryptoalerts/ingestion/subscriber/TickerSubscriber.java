@@ -31,8 +31,12 @@ public class TickerSubscriber implements Action1<PubSubData> {
     @Override
     @Async
     public void call(PubSubData s) {
+        callWithPlainMessage(s.arguments().toString());
+    }
+
+    public void callWithPlainMessage(String message) {
         try {
-            String[] raw = objectMapper.readValue(s.arguments().toString(), new TypeReference<String[]>() {
+            String[] raw = objectMapper.readValue(message, new TypeReference<String[]>() {
             });
             TickerPlot plot = TickerPlot.from(raw);
 

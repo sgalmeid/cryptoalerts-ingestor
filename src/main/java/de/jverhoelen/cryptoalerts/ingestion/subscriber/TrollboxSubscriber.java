@@ -39,8 +39,12 @@ public class TrollboxSubscriber implements Action1<PubSubData> {
     @Override
     @Async
     public void call(PubSubData s) {
+        callWithPlainMessage(s.arguments().toString());
+    }
+
+    public void callWithPlainMessage(String plainMessage) {
         try {
-            String[] raw = objectMapper.readValue(s.arguments().toString(), new TypeReference<String[]>() {
+            String[] raw = objectMapper.readValue(plainMessage, new TypeReference<String[]>() {
             });
             long messageNumber = Long.parseLong(raw[1]);
             String messageText = raw[3];
