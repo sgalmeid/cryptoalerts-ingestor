@@ -9,18 +9,20 @@ import java.util.Date;
 import java.util.Set;
 import java.util.TimeZone;
 
-public class TrollboxMessage {
+public class SentimentedMessage {
 
-    private long id;
+    private String id;
     private String occurrenceTimestamp;
     private String message;
     private SentimentTermKind sentimentKind;
     private Set<String> topics;
+    private IncomingMessageSource source;
 
-    public static TrollboxMessage from(String message, long id) {
-        TrollboxMessage msg = new TrollboxMessage();
+    public static SentimentedMessage from(String message, long id, IncomingMessageSource source) {
+        SentimentedMessage msg = new SentimentedMessage();
 
-        msg.setId(id);
+        msg.setSource(source);
+        msg.setId(id + "-" + source.name());
         msg.setMessage(message);
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -49,11 +51,11 @@ public class TrollboxMessage {
         this.topics = topics;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -71,6 +73,14 @@ public class TrollboxMessage {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setSource(IncomingMessageSource source) {
+        this.source = source;
+    }
+
+    public IncomingMessageSource getSource() {
+        return source;
     }
 
     @Override
