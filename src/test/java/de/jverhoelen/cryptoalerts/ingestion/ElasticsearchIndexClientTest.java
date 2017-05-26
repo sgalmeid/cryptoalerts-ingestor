@@ -31,7 +31,7 @@ public class ElasticsearchIndexClientTest {
                 .andExpect(method(HttpMethod.PUT))
                 .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-        client.putIntoIndex(TrollboxMessage.from("Some message", 123L), "trollbox", "123");
+        client.putIntoIndex(SentimentedMessage.from("Some message", 123L, IncomingMessageSource.POLONIEX_TROLLBOX), "trollbox", "123");
 
         server.verify();
     }

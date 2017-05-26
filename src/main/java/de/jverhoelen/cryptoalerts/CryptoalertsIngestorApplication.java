@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling
-public class PoloniexTickerConsumerApplication extends AsyncConfigurerSupport {
+public class CryptoalertsIngestorApplication extends AsyncConfigurerSupport {
 
     @Autowired
     private IndexedCurrencyCombinationService indexedCurrencyCombinations;
@@ -53,7 +53,7 @@ public class PoloniexTickerConsumerApplication extends AsyncConfigurerSupport {
     private int maxPoolSize;
 
     public static void main(String[] args) {
-        SpringApplication.run(PoloniexTickerConsumerApplication.class, args);
+        SpringApplication.run(CryptoalertsIngestorApplication.class, args);
     }
 
     @PostConstruct

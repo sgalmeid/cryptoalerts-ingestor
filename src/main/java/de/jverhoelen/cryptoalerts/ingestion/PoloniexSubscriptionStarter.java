@@ -6,10 +6,9 @@ import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombination;
 import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombinationService;
+import de.jverhoelen.cryptoalerts.ingestion.processor.IncomingMessageProcessor;
 import de.jverhoelen.cryptoalerts.ingestion.subscriber.TickerSubscriber;
 import de.jverhoelen.cryptoalerts.ingestion.subscriber.TrollboxSubscriber;
-import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
-import de.jverhoelen.cryptoalerts.sentiment.SentimentTermService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class PoloniexSubscriptionStarter {
 
     private IndexedCurrencyCombinationService currencyCombinations;
     private ElasticsearchIndexClient elasticsearchClient;
-    private SentimentTermService sentimentTerms;
+    private IncomingMessageProcessor incomingMessageProcessor;
 
     @Value("${ingest.trollbox}")
     private boolean ingestTrollbox;
@@ -45,10 +44,10 @@ public class PoloniexSubscriptionStarter {
     @Autowired
     public PoloniexSubscriptionStarter(IndexedCurrencyCombinationService currencyCombinations,
                                        ElasticsearchIndexClient elasticsearchClient,
-                                       SentimentTermService sentimentTerms) {
+                                       IncomingMessageProcessor incomingMessageProcessor) {
         this.currencyCombinations = currencyCombinations;
         this.elasticsearchClient = elasticsearchClient;
-        this.sentimentTerms = sentimentTerms;
+        this.incomingMessageProcessor = incomingMessageProcessor;
     }
 
     @PostConstruct
@@ -56,17 +55,16 @@ public class PoloniexSubscriptionStarter {
         List<IndexedCurrencyCombination> all = currencyCombinations.getAll();
         List<String> combinationStrings = all.stream().map(cc -> cc.toApiKey()).collect(Collectors.toList());
 
-        List<String> positiveTerms = sentimentTerms.findByKind(SentimentTermKind.POSITIVE);
-        List<String> negativeTerms = sentimentTerms.findByKind(SentimentTermKind.NEGATIVE);
-
-        if (setupTickerIngestion(combinationStrings)) return;
+        if (ingestTicker) {
+            setupTickerIngestion(combinationStrings);
+        }
 
         if (ingestTrollbox) {
-            setupTrollboxIngestion(positiveTerms, negativeTerms);
+            setupTrollboxIngestion();
         }
     }
 
-    private boolean setupTickerIngestion(List<String> combinationStrings) {
+    private void setupTickerIngestion(List<String> combinationStrings) {
         WampClient client;
         try {
             WampClientBuilder builder = new WampClientBuilder();
@@ -80,31 +78,26 @@ public class PoloniexSubscriptionStarter {
 
             client.statusChanged().subscribe(action -> {
                 if (action instanceof WampClient.ConnectedState) {
-                    if (ingestTicker) {
-                        LOGGER.info("Started ingesting ticker...");
-                        client.makeSubscription("ticker")
-                                .subscribe(new TickerSubscriber(combinationStrings, elasticsearchClient));
-                    }
+                    LOGGER.info("Started ingesting ticker...");
+                    client.makeSubscription("ticker")
+                            .subscribe(new TickerSubscriber(combinationStrings, elasticsearchClient));
+
                     // Old way of consuming the trollbox. Poloniex changed the host. New temporary procedure, see setupTrollboxIngestion()
-//                    if (ingestTrollbox) {
 //                        LOGGER.info("Started ingesting trollbox...");
 //                        client.makeSubscription("trollbox")
 //                                .subscribe(new TrollboxSubscriber(elasticsearchClient, positiveTerms, negativeTerms));
-//                    }
                 }
             });
             client.open();
 
         } catch (Exception e) {
             LOGGER.error("Error while consuming the ticker", e);
-            return true;
         }
-        return false;
     }
 
-    private void setupTrollboxIngestion(List<String> positiveTerms, List<String> negativeTerms) throws IOException, WebSocketException {
+    private void setupTrollboxIngestion() throws IOException, WebSocketException {
         WebSocketFactory factory = new WebSocketFactory();
-        TrollboxSubscriber subscriber = new TrollboxSubscriber(elasticsearchClient, positiveTerms, negativeTerms);
+        TrollboxSubscriber subscriber = new TrollboxSubscriber(incomingMessageProcessor);
 
         WebSocket ws = factory.createSocket("wss://api2.poloniex.com", 5000);
         ws.addListener(new WebSocketAdapter() {

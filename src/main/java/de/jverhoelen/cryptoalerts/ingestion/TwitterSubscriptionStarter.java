@@ -1,52 +1,115 @@
 package de.jverhoelen.cryptoalerts.ingestion;
 
 
-import com.google.common.collect.Lists;
-import com.twitter.hbc.ClientBuilder;
-import com.twitter.hbc.core.Client;
-import com.twitter.hbc.core.Constants;
-import com.twitter.hbc.core.endpoint.StatusesFilterEndpoint;
-import com.twitter.hbc.core.processor.StringDelimitedProcessor;
-import com.twitter.hbc.httpclient.auth.Authentication;
-import com.twitter.hbc.httpclient.auth.OAuth1;
+import de.jverhoelen.cryptoalerts.currency.CryptoCurrency;
+import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombinationService;
+import de.jverhoelen.cryptoalerts.ingestion.processor.IncomingMessageProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import twitter4j.*;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TwitterSubscriptionStarter {
 
-//    @PostConstruct
-    public void init() throws InterruptedException {
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>(10000);
-        StatusesFilterEndpoint endpoint = new StatusesFilterEndpoint();
-        // add some track terms
-        endpoint.trackTerms(Lists.newArrayList("twitterapi", "#yolo"));
+    private static final Logger LOGGER = LoggerFactory.getLogger(TwitterSubscriptionStarter.class);
 
-//        Authentication auth = new OAuth1(consumerKey, consumerSecret, token, secret);
-        // Authentication auth = new BasicAuth(username, password);
+    @Value("${twitter.oauth.consumer.key}")
+    private String oAuthConsumerKey;
 
-//        // Create a new BasicClient. By default gzip is enabled.
-//        Client client = new ClientBuilder()
-//                .hosts(Constants.STREAM_HOST)
-//                .endpoint(endpoint)
-//                .authentication(auth)
-//                .processor(new StringDelimitedProcessor(queue))
-//                .build();
+    @Value("${twitter.oauth.consumer.secret}")
+    private String oAuthConsumerSecret;
 
-        // Establish a connection
-//        client.connect();
+    @Value("${twitter.oauth.access.token}")
+    private String oAuthAccessToken;
 
-        // Do whatever needs to be done with messages
-        for (int msgRead = 0; msgRead < 1000; msgRead++) {
-            String msg = queue.take();
-            System.out.println(msg);
+    @Value("${twitter.oauth.access.token.secret}")
+    private String oAuthAccessTokenSecret;
+
+    @Value("${ingest.twitter}")
+    private boolean enableTwitterIngestion;
+
+    @Autowired
+    private IncomingMessageProcessor processor;
+
+    @Autowired
+    private IndexedCurrencyCombinationService currencyCombinations;
+
+    @PostConstruct
+    public void startTwitterIngestion() {
+        if (enableTwitterIngestion) {
+            List<String> cryptoNames = getInterestingTerms();
+
+            Configuration config = buildConfig();
+            TwitterStream twitterStream = new TwitterStreamFactory(config).getInstance();
+            StatusListener statusListener = new OwnStatusListener();
+
+            twitterStream.addListener(statusListener);
+            twitterStream.filter(
+                    new FilterQuery()
+                            .track(cryptoNames.toArray(new String[cryptoNames.size()]))
+                            .language()
+            );
+        }
+    }
+
+    private List<String> getInterestingTerms() {
+        List<String> cryptoNames = Arrays.stream(CryptoCurrency.values())
+                .map(cc -> "#" + cc.getFullName().toLowerCase())
+                .collect(Collectors.toList());
+        cryptoNames.add("#cryptocurrencies");
+        cryptoNames.add("#kryptowährung");
+
+        return cryptoNames;
+    }
+
+    private Configuration buildConfig() {
+        return new ConfigurationBuilder()
+                .setDebugEnabled(true)
+                .setOAuthConsumerKey(oAuthConsumerKey)
+                .setOAuthConsumerSecret(oAuthConsumerSecret)
+                .setOAuthAccessToken(oAuthAccessToken)
+                .setOAuthAccessTokenSecret(oAuthAccessTokenSecret).build();
+    }
+
+    private class OwnStatusListener implements StatusListener {
+        @Override
+        public void onStatus(Status status) {
+            processor.processMessage(status.getId(), status.getText(), IncomingMessageSource.TWITTER);
         }
 
-//        client.stop();
+        @Override
+        public void onDeletionNotice(StatusDeletionNotice sdn) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void onTrackLimitationNotice(int i) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void onScrubGeo(long l, long l1) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void onStallWarning(StallWarning sw) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void onException(Exception ex) {
+            System.out.println("onException");
+        }
     }
 }
