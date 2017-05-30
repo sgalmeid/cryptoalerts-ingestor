@@ -64,9 +64,14 @@ public class TwitterSubscriptionStarter {
 
     private List<String> getInterestingTerms() {
         List<String> cryptoNames = Arrays.stream(CryptoCurrency.values())
-                .map(cc -> "#" + cc.getFullName().toLowerCase())
+                .flatMap(cc -> {
+                    String hashtag = "#" + cc.getFullName().toLowerCase();
+                    String currencyTag = "$" + cc.name().toUpperCase();
+                    return Arrays.asList(hashtag, currencyTag).stream();
+                })
                 .collect(Collectors.toList());
         cryptoNames.add("#cryptocurrencies");
+        cryptoNames.add("#cryptocurrency");
         cryptoNames.add("#kryptowährung");
 
         return cryptoNames;
