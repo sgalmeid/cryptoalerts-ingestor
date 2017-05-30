@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 
-public class TickerPlotTest {
+public class IngestedTickerPlotTest {
 
     @Test
     public void from() throws Exception {
@@ -24,10 +24,9 @@ public class TickerPlotTest {
                 "3",
         };
 
-        TickerPlot result = TickerPlot.from(testData);
+        IngestedTickerPlot result = IngestedTickerPlot.from(testData);
         assertThat(result.getCurrencyCombination(), is("BTC_DASH"));
         assertThat(result.getLast(), is(3.0));
         assertThat(result.getBaseVolume(), is(3000.0));
-        assertThat(result.getOccurrenceTimestamp().length(), is(24));
     }
 }
