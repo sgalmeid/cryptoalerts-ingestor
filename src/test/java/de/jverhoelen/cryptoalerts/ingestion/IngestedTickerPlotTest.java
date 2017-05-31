@@ -2,6 +2,8 @@ package de.jverhoelen.cryptoalerts.ingestion;
 
 import org.junit.Test;
 
+import java.math.BigDecimal;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -26,7 +28,7 @@ public class IngestedTickerPlotTest {
 
         IngestedTickerPlot result = IngestedTickerPlot.from(testData);
         assertThat(result.getCurrencyCombination(), is("BTC_DASH"));
-        assertThat(result.getLast(), is(3.0));
-        assertThat(result.getBaseVolume(), is(3000.0));
+        assertThat(result.getLast(), is(new BigDecimal(3.0)));
+        assertThat(result.getBaseVolume(), is(new BigDecimal(3000.0)));
     }
 }

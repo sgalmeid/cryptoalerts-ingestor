@@ -55,7 +55,6 @@ public class IncomingMessageProcessor {
                     message.setSentimentKind(SentimentTermKind.NEUTRAL);
                 }
 
-                LOGGER.info("Put message '{}' into index", messageText);
                 elasticsearchClient.putIntoIndex(message, TROLLBOX_INDEX, message.getId() + "");
             }
 

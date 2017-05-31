@@ -2,22 +2,23 @@ package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.google.common.base.MoreObjects;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class IngestedTickerPlot {
 
     private String currencyCombination;
     private Date timestamp;
-    private double last;
-    private double baseVolume;
+    private BigDecimal last;
+    private BigDecimal baseVolume;
 
     public static IngestedTickerPlot from(String[] arr) {
         IngestedTickerPlot p = new IngestedTickerPlot();
 
         p.setTimestamp(new Date());
         p.setCurrencyCombination(arr[0]);
-        p.setLast(Double.parseDouble(arr[1]));
-        p.setBaseVolume(Double.parseDouble(arr[5]));
+        p.setLast(new BigDecimal(arr[1]));
+        p.setBaseVolume(new BigDecimal(arr[5]));
 
         return p;
     }
@@ -38,20 +39,19 @@ public class IngestedTickerPlot {
         this.currencyCombination = currencyCombination;
     }
 
-
-    public double getLast() {
+    public BigDecimal getLast() {
         return last;
     }
 
-    public void setLast(double last) {
+    public void setLast(BigDecimal last) {
         this.last = last;
     }
 
-    public double getBaseVolume() {
+    public BigDecimal getBaseVolume() {
         return baseVolume;
     }
 
-    public void setBaseVolume(double baseVolume) {
+    public void setBaseVolume(BigDecimal baseVolume) {
         this.baseVolume = baseVolume;
     }
 

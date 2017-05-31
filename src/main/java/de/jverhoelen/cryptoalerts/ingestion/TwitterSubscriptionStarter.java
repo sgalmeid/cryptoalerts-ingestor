@@ -114,7 +114,6 @@ public class TwitterSubscriptionStarter {
 
         @Override
         public void onException(Exception ex) {
-            System.out.println("onException");
         }
     }
 }
