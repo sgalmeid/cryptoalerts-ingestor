@@ -1,4 +1,4 @@
-package de.jverhoelen.cryptoalerts.ingestion.processor.indicator;
+package de.jverhoelen.cryptoalerts.ingestion.ticker.plot;
 
 import com.google.common.base.MoreObjects;
 
@@ -13,15 +13,8 @@ public class SimplePlot {
     // open & close
     private BigDecimal open;
     private BigDecimal close;
-    private BigDecimal baseVolume;
 
-    // emas
-    private BigDecimal ema12;
-    private BigDecimal ema26;
-
-    // indicator results
-    private BigDecimal macd;
-    private BigDecimal signal;
+    // plot results
     private BigDecimal rsi;
 
     // gains and losses
@@ -31,12 +24,11 @@ public class SimplePlot {
     private BigDecimal accumulatedLosses;
     private BigDecimal averageLosses;
 
-    public SimplePlot(String currencyCombination, Date time, BigDecimal open, BigDecimal close, BigDecimal baseVolume) {
+    public SimplePlot(String currencyCombination, Date time, BigDecimal open, BigDecimal close) {
         this.currencyCombination = currencyCombination;
         this.time = time;
         this.open = open;
         this.close = close;
-        this.baseVolume = baseVolume;
         this.gainLoss = close.subtract(open);
     }
 
@@ -56,40 +48,12 @@ public class SimplePlot {
         }
     }
 
-    private BigDecimal calculateMacd() {
-        if (ema26 != null && ema26.doubleValue() > 0) {
-            return new BigDecimal(ema12.doubleValue() - ema26.doubleValue());
-        }
-
-        return BigDecimal.ZERO;
-    }
-
-    public void calculateAndSetMacd() {
-        this.macd = calculateMacd();
-    }
-
-    public BigDecimal getBaseVolume() {
-        return baseVolume;
-    }
-
-    public void setBaseVolume(BigDecimal baseVolume) {
-        this.baseVolume = baseVolume;
-    }
-
     public String getCurrencyCombination() {
         return currencyCombination;
     }
 
     public void setCurrencyCombination(String currencyCombination) {
         this.currencyCombination = currencyCombination;
-    }
-
-    public BigDecimal getMacd() {
-        return macd;
-    }
-
-    public void setMacd(BigDecimal macd) {
-        this.macd = macd;
     }
 
     public void setAverageGains(BigDecimal averageGains) {
@@ -162,30 +126,6 @@ public class SimplePlot {
         this.gainLoss = this.close.subtract(this.open);
     }
 
-    public BigDecimal getEma12() {
-        return ema12;
-    }
-
-    public void setEma12(BigDecimal ema12) {
-        this.ema12 = ema12;
-    }
-
-    public BigDecimal getEma26() {
-        return ema26;
-    }
-
-    public void setEma26(BigDecimal ema26) {
-        this.ema26 = ema26;
-    }
-
-    public BigDecimal getSignal() {
-        return signal;
-    }
-
-    public void setSignal(BigDecimal signal) {
-        this.signal = signal;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -208,11 +148,6 @@ public class SimplePlot {
                 .add("currencyCombination", currencyCombination)
                 .add("open", open)
                 .add("close", close)
-                .add("baseVolume", baseVolume)
-                .add("ema12", ema12)
-                .add("ema26", ema26)
-                .add("macd", macd)
-                .add("signal", signal)
                 .add("rsi", rsi)
                 .add("gainLoss", gainLoss)
                 .add("accumulatedGains", accumulatedGains)

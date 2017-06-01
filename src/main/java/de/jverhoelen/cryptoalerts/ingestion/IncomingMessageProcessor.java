@@ -1,13 +1,13 @@
-package de.jverhoelen.cryptoalerts.ingestion.processor;
+package de.jverhoelen.cryptoalerts.ingestion;
 
 import de.jverhoelen.cryptoalerts.currency.CryptoCurrency;
-import de.jverhoelen.cryptoalerts.ingestion.ElasticsearchIndexClient;
-import de.jverhoelen.cryptoalerts.ingestion.IncomingMessageSource;
-import de.jverhoelen.cryptoalerts.ingestion.SentimentedMessage;
+import de.jverhoelen.cryptoalerts.sentiment.IncomingMessageSource;
 import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
 import de.jverhoelen.cryptoalerts.sentiment.SentimentTermService;
+import de.jverhoelen.cryptoalerts.sentiment.SentimentedMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -26,13 +26,18 @@ public class IncomingMessageProcessor {
 
     private SentimentTermService sentimentTerms;
     private ElasticsearchIndexClient elasticsearchClient;
+    private boolean keepMessageTexts;
 
     private List<String> positiveTerms;
     private List<String> negativeTerms;
 
-    public IncomingMessageProcessor(ElasticsearchIndexClient elasticsearchClient, SentimentTermService sentimentTerms) {
+    public IncomingMessageProcessor(ElasticsearchIndexClient elasticsearchClient,
+                                    SentimentTermService sentimentTerms,
+                                    @Value("${ingest.trollbox.keepText}")
+                                            boolean keepMessageTexts) {
         this.elasticsearchClient = elasticsearchClient;
         this.sentimentTerms = sentimentTerms;
+        this.keepMessageTexts = keepMessageTexts;
     }
 
     @PostConstruct
@@ -53,6 +58,10 @@ public class IncomingMessageProcessor {
                     message.setSentimentKind(analyseIntention(messageText));
                 } else {
                     message.setSentimentKind(SentimentTermKind.NEUTRAL);
+                }
+
+                if (!keepMessageTexts) {
+                    message.setMessage("");
                 }
 
                 elasticsearchClient.putIntoIndex(message, TROLLBOX_INDEX, message.getId() + "");

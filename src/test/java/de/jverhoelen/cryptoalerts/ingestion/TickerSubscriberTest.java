@@ -1,16 +1,14 @@
-package de.jverhoelen.cryptoalerts.ingestion.subscriber;
+package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import de.jverhoelen.cryptoalerts.ingestion.IngestedTickerPlot;
-import de.jverhoelen.cryptoalerts.ingestion.processor.TickerIndicatorsProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.plot.TickerPlot;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.indicator.TickerIndicatorsProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.TickerSubscriber;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import ws.wamp.jawampa.PubSubData;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -49,6 +47,6 @@ public class TickerSubscriberTest {
 
         subscriber.call(new PubSubData(null, arrayNode, null));
 
-        verify(tickerIndicatorsProcessor).processNewPlot(any(IngestedTickerPlot.class));
+        verify(tickerIndicatorsProcessor).processNewPlot(any(TickerPlot.class));
     }
 }

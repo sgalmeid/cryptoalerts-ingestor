@@ -1,4 +1,4 @@
-package de.jverhoelen.cryptoalerts.ingestion.processor.indicator;
+package de.jverhoelen.cryptoalerts.ingestion.ticker.indicator;
 
 import java.math.BigDecimal;
 

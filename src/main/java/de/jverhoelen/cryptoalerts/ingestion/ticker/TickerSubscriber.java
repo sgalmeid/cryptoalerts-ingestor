@@ -1,9 +1,9 @@
-package de.jverhoelen.cryptoalerts.ingestion.subscriber;
+package de.jverhoelen.cryptoalerts.ingestion.ticker;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.jverhoelen.cryptoalerts.ingestion.IngestedTickerPlot;
-import de.jverhoelen.cryptoalerts.ingestion.processor.TickerIndicatorsProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.indicator.TickerIndicatorsProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.plot.TickerPlot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -32,7 +32,7 @@ public class TickerSubscriber implements Action1<PubSubData> {
         try {
             String[] raw = objectMapper.readValue(message, new TypeReference<String[]>() {
             });
-            IngestedTickerPlot plot = IngestedTickerPlot.from(raw);
+            TickerPlot plot = TickerPlot.from(raw);
 
             processor.processNewPlot(plot);
         } catch (IOException e) {

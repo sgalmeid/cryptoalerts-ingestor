@@ -1,9 +1,10 @@
-package de.jverhoelen.cryptoalerts.ingestion;
+package de.jverhoelen.cryptoalerts.ingestion.starter;
 
 
 import de.jverhoelen.cryptoalerts.currency.CryptoCurrency;
 import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombinationService;
-import de.jverhoelen.cryptoalerts.ingestion.processor.IncomingMessageProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.IncomingMessageProcessor;
+import de.jverhoelen.cryptoalerts.sentiment.IncomingMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,8 @@
-package de.jverhoelen.cryptoalerts.ingestion.subscriber;
+package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.jverhoelen.cryptoalerts.ingestion.processor.IncomingMessageProcessor;
-import de.jverhoelen.cryptoalerts.ingestion.IncomingMessageSource;
+import de.jverhoelen.cryptoalerts.sentiment.IncomingMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;

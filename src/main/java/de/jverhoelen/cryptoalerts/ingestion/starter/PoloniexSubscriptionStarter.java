@@ -1,13 +1,13 @@
-package de.jverhoelen.cryptoalerts.ingestion;
+package de.jverhoelen.cryptoalerts.ingestion.starter;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
-import de.jverhoelen.cryptoalerts.ingestion.processor.IncomingMessageProcessor;
-import de.jverhoelen.cryptoalerts.ingestion.processor.TickerIndicatorsProcessor;
-import de.jverhoelen.cryptoalerts.ingestion.subscriber.TickerSubscriber;
-import de.jverhoelen.cryptoalerts.ingestion.subscriber.TrollboxSubscriber;
+import de.jverhoelen.cryptoalerts.ingestion.IncomingMessageProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.indicator.TickerIndicatorsProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.TickerSubscriber;
+import de.jverhoelen.cryptoalerts.ingestion.TrollboxSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

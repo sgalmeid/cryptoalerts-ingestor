@@ -1,5 +1,6 @@
-package de.jverhoelen.cryptoalerts.ingestion.processor.indicator;
+package de.jverhoelen.cryptoalerts.ingestion;
 
+import de.jverhoelen.cryptoalerts.ingestion.ticker.indicator.RsiInterpretation;
 import org.junit.Test;
 
 import java.math.BigDecimal;

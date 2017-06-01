@@ -1,5 +1,7 @@
 package de.jverhoelen.cryptoalerts.ingestion;
 
+import de.jverhoelen.cryptoalerts.sentiment.IncomingMessageSource;
+import de.jverhoelen.cryptoalerts.sentiment.SentimentedMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
