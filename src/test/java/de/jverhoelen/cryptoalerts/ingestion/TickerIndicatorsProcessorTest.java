@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 public class TickerIndicatorsProcessorTest {
 
-    StatefulPlotIndicatorsCalculator statefulCalculator = new StatefulPlotIndicatorsCalculator(new PlotIndicatorsCalculator());
+    StatefulPlotIndicatorsCalculator statefulCalculator = new StatefulPlotIndicatorsCalculator(new PlotIndicatorsCalculator(), 5, "MINUTES");
     TickerIndicatorsProcessor processor;
 
     @Before

@@ -4,21 +4,30 @@ import de.jverhoelen.cryptoalerts.ingestion.ticker.plot.PriceChangeCalculationRe
 import de.jverhoelen.cryptoalerts.ingestion.ticker.plot.SimplePlot;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class StatefulPlotIndicatorsCalculator {
 
+    private final int candlestickSize;
+    private final ChronoUnit candlestickUnit;
     private PlotIndicatorsCalculator calculator;
     private Map<String, State> temp = new HashMap<>();
 
     @Autowired
-    public StatefulPlotIndicatorsCalculator(PlotIndicatorsCalculator calculator) {
+    public StatefulPlotIndicatorsCalculator(PlotIndicatorsCalculator calculator,
+                                            @Value("${ingest.ticker.candlestick.size}") int candlestickSize,
+                                            @Value("${ingest.ticker.candlestick.unit}") String candlestickUnit) {
         this.calculator = calculator;
+        this.candlestickSize = candlestickSize;
+        this.candlestickUnit = ChronoUnit.valueOf(candlestickUnit);
     }
 
     public PriceChangeCalculationResult processPriceChange(SimplePlot plot) {
@@ -85,7 +94,7 @@ public class StatefulPlotIndicatorsCalculator {
         }
 
         boolean newCandleShouldStart() {
-            return candleStartTime == null || LocalDateTime.now().isAfter(candleStartTime.plusSeconds(5));
+            return candleStartTime == null || LocalDateTime.now().isAfter(candleStartTime.plus(candlestickSize, candlestickUnit));
         }
 
         void rememberPrice(SimplePlot plot) {
