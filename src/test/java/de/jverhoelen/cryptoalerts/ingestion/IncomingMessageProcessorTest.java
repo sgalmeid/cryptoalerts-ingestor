@@ -1,7 +1,8 @@
-package de.jverhoelen.cryptoalerts.ingestion.processor;
+package de.jverhoelen.cryptoalerts.ingestion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.jverhoelen.cryptoalerts.ingestion.ElasticsearchIndexClient;
+import de.jverhoelen.cryptoalerts.ingestion.IncomingMessageProcessor;
 import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
 import de.jverhoelen.cryptoalerts.sentiment.SentimentTermService;
 import org.junit.Before;
@@ -34,35 +35,9 @@ public class IncomingMessageProcessorTest {
         when(sentimentTerms.findByKind(SentimentTermKind.POSITIVE)).thenReturn(positiveTerms);
         when(sentimentTerms.findByKind(SentimentTermKind.NEGATIVE)).thenReturn(negativeTerms);
 
-        processor = new IncomingMessageProcessor(esClient, sentimentTerms);
+        processor = new IncomingMessageProcessor(esClient, sentimentTerms, true);
         processor.initializeTerms();
     }
-
-//    @Test
-//    public void call_plotIngested() throws Exception {
-//        ArrayNode arrayNode = Mockito.mock(ArrayNode.class);
-//        String messageText = "This is the message text about ETH and it says something good, verrry bad but it's trending up";
-//        when(arrayNode.toString())
-//                .thenReturn(
-//                        mapper.writeValueAsString(new String[]{
-//                                "",
-//                                "123456",
-//                                "",
-//                                messageText
-//                        }));
-//
-//        processor.(new PubSubData(null, arrayNode, null));
-//
-//        ArgumentCaptor<SentimentedMessage> capturedTroll = ArgumentCaptor.forClass(SentimentedMessage.class);
-//        verify(esClient).putIntoIndex(capturedTroll.capture(), eq("poloniex/trollbox"), anyString());
-//
-//        SentimentedMessage msg = capturedTroll.getValue();
-//        assertTrue(msg != null);
-//        assertThat(msg.getId(), is(123456L));
-//        assertThat(msg.getMessage(), is(messageText));
-//        assertThat(msg.getSentimentKind(), is(SentimentTermKind.POSITIVE));
-//        assertTrue(msg.getTopics().contains("ETH"));
-//    }
 
     @Test
     public void containsTermAsWord() throws Exception {

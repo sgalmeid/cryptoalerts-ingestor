@@ -1,14 +1,13 @@
-package de.jverhoelen.cryptoalerts.ingestion;
+package de.jverhoelen.cryptoalerts.ingestion.starter;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
-import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombination;
-import de.jverhoelen.cryptoalerts.currency.combination.IndexedCurrencyCombinationService;
-import de.jverhoelen.cryptoalerts.ingestion.processor.IncomingMessageProcessor;
-import de.jverhoelen.cryptoalerts.ingestion.subscriber.TickerSubscriber;
-import de.jverhoelen.cryptoalerts.ingestion.subscriber.TrollboxSubscriber;
+import de.jverhoelen.cryptoalerts.ingestion.IncomingMessageProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.indicator.TickerIndicatorsProcessor;
+import de.jverhoelen.cryptoalerts.ingestion.ticker.TickerSubscriber;
+import de.jverhoelen.cryptoalerts.ingestion.TrollboxSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +23,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 public class PoloniexSubscriptionStarter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PoloniexSubscriptionStarter.class);
 
-    private IndexedCurrencyCombinationService currencyCombinations;
-    private ElasticsearchIndexClient elasticsearchClient;
     private IncomingMessageProcessor incomingMessageProcessor;
+    private TickerIndicatorsProcessor tickerIndicatorsProcessor;
 
     @Value("${ingest.trollbox}")
     private boolean ingestTrollbox;
@@ -42,21 +39,16 @@ public class PoloniexSubscriptionStarter {
     private boolean ingestTicker;
 
     @Autowired
-    public PoloniexSubscriptionStarter(IndexedCurrencyCombinationService currencyCombinations,
-                                       ElasticsearchIndexClient elasticsearchClient,
+    public PoloniexSubscriptionStarter(TickerIndicatorsProcessor tickerIndicatorsProcessor,
                                        IncomingMessageProcessor incomingMessageProcessor) {
-        this.currencyCombinations = currencyCombinations;
-        this.elasticsearchClient = elasticsearchClient;
+        this.tickerIndicatorsProcessor = tickerIndicatorsProcessor;
         this.incomingMessageProcessor = incomingMessageProcessor;
     }
 
     @PostConstruct
     public void startConsumption() throws Exception {
-        List<IndexedCurrencyCombination> all = currencyCombinations.getAll();
-        List<String> combinationStrings = all.stream().map(cc -> cc.toApiKey()).collect(Collectors.toList());
-
         if (ingestTicker) {
-            setupTickerIngestion(combinationStrings);
+            setupTickerIngestion();
         }
 
         if (ingestTrollbox) {
@@ -64,7 +56,7 @@ public class PoloniexSubscriptionStarter {
         }
     }
 
-    private void setupTickerIngestion(List<String> combinationStrings) {
+    private void setupTickerIngestion() {
         WampClient client;
         try {
             WampClientBuilder builder = new WampClientBuilder();
@@ -80,7 +72,7 @@ public class PoloniexSubscriptionStarter {
                 if (action instanceof WampClient.ConnectedState) {
                     LOGGER.info("Started ingesting ticker...");
                     client.makeSubscription("ticker")
-                            .subscribe(new TickerSubscriber(combinationStrings, elasticsearchClient));
+                            .subscribe(new TickerSubscriber(tickerIndicatorsProcessor));
 
                     // Old way of consuming the trollbox. Poloniex changed the host. New temporary procedure, see setupTrollboxIngestion()
 //                        LOGGER.info("Started ingesting trollbox...");

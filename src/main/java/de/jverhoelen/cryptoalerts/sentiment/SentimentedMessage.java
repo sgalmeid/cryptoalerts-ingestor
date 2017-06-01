@@ -1,7 +1,6 @@
-package de.jverhoelen.cryptoalerts.ingestion;
+package de.jverhoelen.cryptoalerts.sentiment;
 
 import com.google.common.base.MoreObjects;
-import de.jverhoelen.cryptoalerts.sentiment.SentimentTermKind;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
