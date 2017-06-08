@@ -22,7 +22,7 @@ public enum CryptoCurrency {
     SYS("Syscoin"),
     XVC("Vcash"),
     XMP("Primecoin"),
-    NEM("NEM"),
+    XEM("NEM"),
     XCP("Counterparty"),
     XBC("BitcoinPlus"),
     VRC("VeriCoin"),
